@@ -2,8 +2,8 @@
 
 // Syfte: kodvana 
 
-// Men först: gå igegnom multidimensionella arrayer
-// genom ett exempel - en ETCH-A-SCETCH som kan bli en 
+// Men först: gå igenom multidimensionella arrayer
+// genom ett praktiskt exempel - en ETCH-A-SCETCH som kan bli en 
 // SNAKE om ni vill
 
 // VI SKA SKAPA ETCH A SCETCH IDAG
@@ -13,3 +13,25 @@
 
 // Endast egen programmering sen
 
+
+
+
+// #####################
+// #      @            #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #                   #  
+// #####################
+// Ange vad du vill göra:u + ENTER           
+        
+
+int main(){
+
+    return 0;
+}
