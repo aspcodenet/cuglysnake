@@ -1,14 +1,26 @@
 PROG=main.exe
-CC=gcc
-CFLAGS=-g -Wall -Werror
-CFLAGS2=-O3 -Wall -Werror
-DEPS = 
-OBJ_CODE = 
-OBJ = $(OBJ_CODE) main.o 
+# CC=gcc
+DEPS=test.h
+SOURCES=main.c test.c
+CFLAGS=-Wall -Werror -g
+OUTPUTDIR=obj
+OBJS = $(addprefix $(OUTPUTDIR)/, $(SOURCES:.c=.o))
 
- 
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
- 
-$(PROG): $(OBJ)
+all: $(OUTPUTDIR) $(PROG)
+
+$(PROG): $(OBJS) 
 	$(CC) -o $@ $^ $(CFLAGS)
+
+$(OUTPUTDIR)/%.o: %.c $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+
+$(OUTPUTDIR):
+	@mkdir "$(OUTPUTDIR)"
+
+clean:
+	@del /q "$(OUTPUTDIR)" 
+	@del /q $(PROG)
+
+
+.PHONY: prep clean

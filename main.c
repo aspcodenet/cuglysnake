@@ -1,117 +1,151 @@
-// TISDAG Kodartisdag !
-
-// Syfte: kodvana 
-
-// Men först: gå igenom multidimensionella arrayer
-// genom ett praktiskt exempel - en ETCH-A-SCETCH som kan bli en 
-// SNAKE om ni vill
-
-// VI SKA SKAPA ETCH A SCETCH IDAG
-// https://wokwi.com/projects/378100012183685121
-// fast vi bygger i console
-// som ni kan bygga vidare till SNAKE
-
-// Endast egen programmering sen
-
-
-
-
-// #####################
-// #      @            #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #                   #  
-// #####################
-// Ange vad du vill göra:u + ENTER           
-
-#define ROWS 10 //
-#define COLS 30 //
-#define WALL '#'
 #include <stdio.h>
+#include <time.h>
+#include <math.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <conio.h>
 
-typedef struct {
-    int x;
-    int y;
-} SNAKE;
+#include <time.h>
+#include <errno.h>    
 
-//#define clrscr() printf("\e[1;1H\e[2J")
+  
 
-void clrscr(){
-    printf("\e[1;1H\e[2J");
+void hideCursor(){
+    printf("\e[?25l");
 }
 
+/* msleep(): Sleep for the requested number of milliseconds. */
+int msleep(long msec)
+{
+    struct timespec ts;
+    int res;
+
+    if (msec < 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    ts.tv_sec = msec / 1000;
+    ts.tv_nsec = (msec % 1000) * 1000000;
+
+    do {
+        res = nanosleep(&ts, &ts);
+    } while (res && errno == EINTR);
+
+    return res;
+}
+
+#define ROWS 10 // 2-9
+#define COLS 30 // 2-29
+#define WALL '#'
+
+typedef struct{
+    int X;
+    int Y;
+}Snake;
+
+
+#define clrscr() printf("\e[1;1H\e[2J")
 void gotoxy(int x,int y){
     printf("%c[%d;%df",0x1B,y,x);
 }
 
 
-void drawTopOrBottomBoundaryRow(){
-    for(int i = 0; i < COLS+2;i++){
-        printf("%c", WALL);
-    }
-    printf("\n");
-}
-
-void drawMiddleBoundaryRow(){
-    printf("#");
-    for(int i = 0; i < COLS;i++){
-        printf(" ");    
-    }
-    printf("#");
-    printf("\n");
-}
 
 void drawBoundaries(){
-    drawTopOrBottomBoundaryRow();
-
-    for(int row = 0; row < ROWS;row++){
-        drawMiddleBoundaryRow();
+    for(int row = 0; row < ROWS+2;row++){
+        for(int col = 0; col < COLS+2; col++){
+            if(row == 0 || row == ROWS+1 || col == 0 || col == COLS+1){
+                printf("%c",WALL);         
+            }
+            else{
+                printf(" ");
+            }
+        }
+        printf("\n");
+        
     }
+}
 
-    drawTopOrBottomBoundaryRow();
-} 
 
-void drawSnake(SNAKE snake){
-    gotoxy(snake.x,snake.y);
+void drawSnake(Snake snake){
+    gotoxy(snake.X,snake.Y);
     printf("@");
 }
-        
 
-int main(){
-    SNAKE snake;
-    snake.x = 5;
-    snake.y = 4;
-    while(1){ // gameloop
-        clrscr();
-        //rita ut spelplanen
-        drawBoundaries();
-        // rita vår snake
-        drawSnake(snake);
-        //känna om vi ska byta riktning (läs joystick)
-        //                  fråga vad vill du göra  U D L R
-        // flytta vår snake
-        char input[20];
-        gotoxy(0,ROWS+3);
-        printf("Enter what to do:");       
-        scanf(" %s", input);
-        if(input[0] == 'u'){
-            snake.y--; 
-        }
-        else if(input[0] == 'd'){
-            snake.y++; 
-        }
-        else if(input[0] == 'r'){
-            snake.x++; 
-        }
-        else if(input[0] == 'l'){
-            snake.x--; 
-        }
+void clearSnake(Snake snake){
+    gotoxy(snake.X,snake.Y);
+    printf(" ");
+}
+
+
+typedef enum {
+    KeyboardDir_Left,    
+    KeyboardDir_Right,
+    KeyboardDir_Up,
+    KeyboardDir_Down,
+}KeyboardDir;
+
+
+int kbhit2()
+{
+    return _kbhit();
+}
+
+int getNextKeyboardAction(){
+    if(kbhit2()){
+        //gotoxy(0,ROWS+3);
+        //printf("Ange vad den ska göra:");
+        char ch = getch();
+        //printf("%d",ch);
+        return ch;
     }
     return 0;
+}
+
+
+
+void moveSnake(Snake *snake,KeyboardDir direction){
+    if(direction == KeyboardDir_Up){
+        if(snake->Y == 2) snake->Y = ROWS+1;
+        else snake->Y--;
+    }
+    if(direction == KeyboardDir_Down){
+        if(snake->Y == ROWS+1) snake->Y = 2;
+        else snake->Y++;
+    }
+    if(direction == KeyboardDir_Left){
+        if(snake->X == 2) snake->X = COLS+1;
+        else snake->X--;
+    }
+    if(direction == KeyboardDir_Right){
+        if(snake->X == COLS+1) snake->X = 2;
+        else snake->X++;
+    }
+
+
+}
+
+int main(){
+    Snake snake;
+    snake.X = 5; 
+    snake.Y = 5;
+    clrscr();
+    hideCursor();
+    drawBoundaries(1);
+    while(1){
+        //clrscr();
+        //drawBoundaries(1);
+        clearSnake(snake);
+        gotoxy(0,0);
+        char ch = getNextKeyboardAction();
+        if(ch == 'u') moveSnake(&snake,KeyboardDir_Up);
+        else if(ch == 'd') moveSnake(&snake,KeyboardDir_Down);
+        else if(ch == 'l') moveSnake(&snake,KeyboardDir_Left);
+        else if(ch == 'r') moveSnake(&snake,KeyboardDir_Right);
+        drawSnake(snake);
+        msleep(250);
+    }
+    return 1;
 }
